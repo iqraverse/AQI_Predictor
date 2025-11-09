@@ -8,10 +8,19 @@ on:
 jobs:
   forecast:
     runs-on: ubuntu-latest
+    env:
+      MLFLOW_TRACKING_URI: file:./mlruns
+      MLFLOW_ARTIFACT_URI: file:./mlruns/artifacts
 
     steps:
       - name: "🔽 Checkout repository"
         uses: actions/checkout@v4
+
+      - name: "📦 Download MLflow Registry Artifact"
+        uses: actions/download-artifact@v4
+        with:
+          name: mlflow-registry
+          path: .
 
       - name: "🧱 Setup Python"
         uses: actions/setup-python@v4
