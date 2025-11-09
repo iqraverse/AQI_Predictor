@@ -16,6 +16,12 @@ permissions:
 jobs:
   forecast:
     runs-on: ubuntu-latest
+
+    # ✅ Added job-level permissions
+    permissions:
+      contents: write
+      actions: read
+
     env:
       MLFLOW_TRACKING_URI: file:./mlruns
       MLFLOW_ARTIFACT_URI: file:./mlruns/artifacts
@@ -27,7 +33,7 @@ jobs:
       - name: "📁 Create Required Folders"
         run: mkdir -p mlruns models data/predictions
 
-      # ✅ Step 1: Find latest SUCCESSFUL retraining run (fixed!)
+      # ✅ Step 1: Find latest SUCCESSFUL retraining run
       - name: "🧠 Find Latest Retraining Run ID"
         id: find_run
         run: |
