@@ -33,10 +33,10 @@ jobs:
         run: |
           python src/train_rf_xgb_feast.py
 
-      - name: "💾 Upload MLflow & Models as Artifacts"
+      - name: "💾 Upload MLflow Registry & Models"
         uses: actions/upload-artifact@v4
         with:
-          name: mlflow-registry
+          name: mlflow_artifacts
           path: |
             mlruns/
             models/

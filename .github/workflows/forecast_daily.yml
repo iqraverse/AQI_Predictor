@@ -1,6 +1,10 @@
 name: "🔮 Daily Forecast (Auto AQI Prediction)"
 
 on:
+  workflow_run:
+    workflows: ["🔁 Model Retraining (Feast + MLflow)"]
+    types:
+      - completed
   schedule:
     - cron: "15 0 * * *"   # every day at 00:15 UTC (5:15 AM Pakistan)
   workflow_dispatch:
@@ -22,7 +26,7 @@ jobs:
       - name: "📦 Download MLflow Registry Artifact"
         uses: actions/download-artifact@v4
         with:
-          name: mlflow-registry
+          name: mlflow_artifacts
           path: .
 
       - name: "🧾 Debug — Verify Restored Folders"
