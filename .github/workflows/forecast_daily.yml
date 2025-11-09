@@ -23,7 +23,6 @@ jobs:
       - name: "📁 Create Required Folders"
         run: mkdir -p mlruns models data/predictions
 
-      # ✅ STEP 1: Find latest successful retraining run ID dynamically
       - name: "🧠 Find Latest Retraining Run ID"
         id: find_run
         run: |
@@ -34,39 +33,33 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # ✅ STEP 2: Download MLflow registry artifact from last successful run
       - name: "📦 Download MLflow Registry Artifact"
         if: ${{ steps.find_run.outputs.run_id != '' }}
         uses: actions/download-artifact@v4
         with:
-          name: mlflow-registry       # 🔥 Must match retrain_model.yml
+          name: mlflow_artifacts          # <-- MATCHES retrain upload
           path: .
           run-id: ${{ steps.find_run.outputs.run_id }}
 
-      # ✅ STEP 3: Debug to verify artifact contents
       - name: "🧾 Debug — Verify Restored Folders"
         run: |
           echo "----- Folder structure after artifact download -----"
-          ls -R | head -n 50
+          ls -R | head -n 200
 
-      # ✅ STEP 4: Setup Python
       - name: "🧱 Setup Python"
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      # ✅ STEP 5: Install dependencies
       - name: "📦 Install Dependencies"
         run: |
           pip install -r requirements.txt
           pip install mlflow scikit-learn pandas pyarrow joblib xgboost
 
-      # ✅ STEP 6: Generate forecast
       - name: "🔮 Generate 3-Day Forecast"
         run: |
           python src/forecast_next_days.py
 
-      # ✅ STEP 7: Commit updated forecast to repo
       - name: "💾 Commit Forecast CSV"
         run: |
           git config --global user.name "GitHub Actions"
