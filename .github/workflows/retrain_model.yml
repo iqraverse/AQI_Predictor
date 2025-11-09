@@ -26,6 +26,9 @@ jobs:
           pip install -r requirements.txt
           pip install mlflow feast scikit-learn pandas pyarrow xgboost joblib seaborn matplotlib
 
+      - name: "🧱 Ensure MLflow Folder Exists"
+        run: mkdir -p mlruns models
+
       - name: "🧠 Train Models (RF + XGBoost)"
         run: |
           python src/train_rf_xgb_feast.py
