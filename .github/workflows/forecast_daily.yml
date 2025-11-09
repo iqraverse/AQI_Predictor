@@ -23,35 +23,55 @@ jobs:
       - name: "📁 Create Required Folders"
         run: mkdir -p mlruns models data/predictions
 
+      # ✅ STEP 1: Find latest successful retraining run ID dynamically
+      - name: "🧠 Find Latest Retraining Run ID"
+        id: find_run
+        run: |
+          echo "🔍 Fetching latest retrain run ID..."
+          LATEST_RUN_ID=$(gh run list --workflow "🔁 Model Retraining (Feast + MLflow)" --branch main --json databaseId,status --jq '.[] | select(.status=="completed") | .databaseId' | head -n 1)
+          echo "✅ Latest run ID: $LATEST_RUN_ID"
+          echo "run_id=$LATEST_RUN_ID" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ✅ STEP 2: Download artifacts from that run
       - name: "📦 Download MLflow Registry Artifact"
+        if: ${{ steps.find_run.outputs.run_id != '' }}
         uses: actions/download-artifact@v4
         with:
           name: mlflow_artifacts
           path: .
+          repository: iqraverse/AQI_Predictor
+          run-id: ${{ steps.find_run.outputs.run_id }}
 
+      # ✅ STEP 3: Debug to verify artifact contents
       - name: "🧾 Debug — Verify Restored Folders"
         run: |
-          echo "----- Folder structure after download -----"
+          echo "----- Folder structure after artifact download -----"
           ls -R | head -n 50
 
+      # ✅ STEP 4: Setup Python
       - name: "🧱 Setup Python"
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
+      # ✅ STEP 5: Install dependencies
       - name: "📦 Install Dependencies"
         run: |
           pip install -r requirements.txt
           pip install mlflow scikit-learn pandas pyarrow joblib xgboost
 
+      # ✅ STEP 6: Generate forecast
       - name: "🔮 Generate 3-Day Forecast"
         run: |
           python src/forecast_next_days.py
 
+      # ✅ STEP 7: Commit updated forecast to repo
       - name: "💾 Commit Forecast CSV"
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
           git add data/predictions/*.csv || true
-          git commit -m "📈 Auto-generated AQI Forecast (CI)" || echo "No new forecast"
+          git commit -m "📈 Auto-generated AQI Forecast (CI/CD)" || echo "No new forecast"
           git push || echo "Nothing to push"
