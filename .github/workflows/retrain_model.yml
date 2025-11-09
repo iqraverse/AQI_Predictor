@@ -28,7 +28,7 @@ jobs:
           python src/train_rf_xgb_feast.py
 
       - name: "💾 Save Trained Models as Artifacts"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4   # ✅ UPDATED VERSION
         with:
           name: trained-models
           path: models/
