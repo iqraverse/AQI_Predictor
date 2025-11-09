@@ -25,7 +25,7 @@ jobs:
 
       - name: "🔮 Generate 3-Day Forecast"
         run: |
-          python forecast_next_days.py
+          python src/forecast_next_days.py
 
       - name: "💾 Commit Forecast CSV"
         run: |

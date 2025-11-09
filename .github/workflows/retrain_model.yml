@@ -25,7 +25,7 @@ jobs:
 
       - name: "🧠 Train Models (RF + XGBoost)"
         run: |
-          python train_rf_xgb_feast.py
+          python src/train_rf_xgb_feast.py
 
       - name: "💾 Save Trained Models as Artifacts"
         uses: actions/upload-artifact@v3
