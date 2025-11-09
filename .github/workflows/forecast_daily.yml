@@ -27,12 +27,12 @@ jobs:
       - name: "📁 Create Required Folders"
         run: mkdir -p mlruns models data/predictions
 
-      # ✅ Step 1: Find latest SUCCESSFUL retraining run
+      # ✅ Step 1: Find latest SUCCESSFUL retraining run (fixed!)
       - name: "🧠 Find Latest Retraining Run ID"
         id: find_run
         run: |
-          echo "🔍 Fetching latest *successful* retrain run ID..."
-          LATEST_RUN_ID=$(gh run list --workflow "🔁 Model Retraining (Feast + MLflow)" --branch main --json databaseId,status --jq '.[] | select(.status=="success") | .databaseId' | head -n 1)
+          echo "🔍 Fetching latest *successful* retrain run ID (any branch)..."
+          LATEST_RUN_ID=$(gh run list --workflow "🔁 Model Retraining (Feast + MLflow)" --json databaseId,status --jq '.[] | select(.status=="success") | .databaseId' | head -n 1)
           if [ -z "$LATEST_RUN_ID" ]; then
             echo "❌ No successful retraining run found — please run the training workflow first!"
             exit 1
