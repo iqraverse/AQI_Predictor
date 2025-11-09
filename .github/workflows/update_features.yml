@@ -25,7 +25,7 @@ jobs:
 
       - name: "🧠 Run Feature Engineering & Upload to Feast"
         run: |
-          python feature_engineering.py
+          python src/feature_pipeline.py
           python feature_repo/upload_to_feast.py
 
       - name: "💾 Commit Updated Features"
