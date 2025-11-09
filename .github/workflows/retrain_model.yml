@@ -9,6 +9,10 @@ jobs:
   retrain-model:
     runs-on: ubuntu-latest
 
+    # ✅ Fix MLflow artifact storage issue
+    env:
+      MLFLOW_ARTIFACT_URI: file:./mlruns/artifacts
+
     steps:
       - name: "🔽 Checkout repository"
         uses: actions/checkout@v4
@@ -28,7 +32,12 @@ jobs:
           python src/train_rf_xgb_feast.py
 
       - name: "💾 Save Trained Models as Artifacts"
-        uses: actions/upload-artifact@v4   # ✅ UPDATED VERSION
+        uses: actions/upload-artifact@v4
         with:
           name: trained-models
           path: models/
+
+      - name: "✅ Training Summary"
+        run: |
+          echo "✅ Model retraining completed successfully!"
+          echo "All artifacts and logs stored under ./mlruns and ./models/"
