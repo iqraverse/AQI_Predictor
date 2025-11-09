@@ -1,0 +1,34 @@
+name: "🔁 Model Retraining (Feast + MLflow)"
+
+on:
+  schedule:
+    - cron: "0 0 */3 * *"   # every 3 days at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  retrain-model:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "🔽 Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "🧱 Setup Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: "📦 Install Dependencies"
+        run: |
+          pip install -r requirements.txt
+          pip install mlflow feast scikit-learn pandas pyarrow xgboost joblib seaborn matplotlib
+
+      - name: "🧠 Train Models (RF + XGBoost)"
+        run: |
+          python train_rf_xgb_feast.py
+
+      - name: "💾 Save Trained Models as Artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: trained-models
+          path: models/

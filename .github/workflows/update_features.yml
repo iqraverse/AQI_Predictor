@@ -1,0 +1,37 @@
+name: "🕒 Daily Feature Update (Feast)"
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # every day at 00:00 UTC (5 AM Pakistan)
+  workflow_dispatch:
+
+jobs:
+  update-features:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "🔽 Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "🧱 Setup Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: "📦 Install Dependencies"
+        run: |
+          pip install -r requirements.txt
+          pip install feast mlflow scikit-learn pandas pyarrow xgboost joblib seaborn matplotlib
+
+      - name: "🧠 Run Feature Engineering & Upload to Feast"
+        run: |
+          python feature_engineering.py
+          python feature_repo/upload_to_feast.py
+
+      - name: "💾 Commit Updated Features"
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          git add data/final/*.parquet || true
+          git commit -m "🔄 Auto-update features via CI" || echo "No feature changes"
+          git push || echo "No push (no changes)"

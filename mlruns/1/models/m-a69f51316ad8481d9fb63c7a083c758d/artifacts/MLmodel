@@ -1,0 +1,49 @@
+artifact_path: file:///C:/Users/iqram/DataScience/Project_AQI_Predicitor/mlruns/1/models/m-a69f51316ad8481d9fb63c7a083c758d/artifacts
+env_vars:
+- HOPSWORKS_API_KEY
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.11.9
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+is_signature_from_type_hint: false
+mlflow_version: 3.5.1
+model_id: m-a69f51316ad8481d9fb63c7a083c758d
+model_size_bytes: 79636357
+model_uuid: m-a69f51316ad8481d9fb63c7a083c758d
+prompts: null
+run_id: c095eea849d340358b62f532aee5b0ef
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "double", "name": "pm25", "required": true}, {"type": "double",
+    "name": "co", "required": true}, {"type": "double", "name": "no2", "required":
+    true}, {"type": "double", "name": "so2", "required": true}, {"type": "double",
+    "name": "o3", "required": true}, {"type": "double", "name": "temperature", "required":
+    true}, {"type": "double", "name": "humidity", "required": true}, {"type": "double",
+    "name": "wind_speed", "required": true}, {"type": "double", "name": "pressure_msl",
+    "required": true}, {"type": "double", "name": "hour", "required": true}, {"type":
+    "double", "name": "dayofweek", "required": true}, {"type": "double", "name": "month",
+    "required": true}, {"type": "double", "name": "is_weekend", "required": true},
+    {"type": "double", "name": "pm25_lag1", "required": true}, {"type": "double",
+    "name": "pm25_lag2", "required": true}, {"type": "double", "name": "pm25_roll3h",
+    "required": true}, {"type": "double", "name": "pm25_roll6h", "required": true},
+    {"type": "double", "name": "pm25_change_rate", "required": true}, {"type": "double",
+    "name": "humidity_lag12h", "required": true}, {"type": "double", "name": "wind_speed_lag24h",
+    "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-08 21:53:46.929607'

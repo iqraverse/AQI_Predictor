@@ -1,0 +1,134 @@
+import os
+from datetime import timedelta
+import pandas as pd
+import numpy as np
+import mlflow
+import joblib
+
+# -------- Paths --------
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+DATA_PATH = os.path.join(PROJECT_ROOT, "data", "final", "karachi_aqi_final.parquet")
+PRED_PATH = os.path.join(PROJECT_ROOT, "data", "predictions")
+MLFLOW_DB_PATH = os.path.join(PROJECT_ROOT, "mlruns", "mlflow.db")
+
+FEATURE_SCALER_PATH = os.path.join(PROJECT_ROOT, "models", "scaler.pkl")
+TARGET_SCALER_PATH = os.path.join(PROJECT_ROOT, "models", "target_scaler.pkl")
+
+os.makedirs(PRED_PATH, exist_ok=True)
+mlflow_uri = f"sqlite:///{MLFLOW_DB_PATH.replace(os.sep, '/')}"
+
+mlflow.set_tracking_uri(mlflow_uri)
+
+# -------- Config --------
+MODEL_NAME = "AQI_Predictor_XGBoost"   # or RandomForest
+MODEL_STAGE = "Staging"
+TARGET_COL = "target_pm25_next"
+FORECAST_HORIZON = 3
+
+# -------- Load Model --------
+print(f"🔗 Connecting to MLflow Model Registry: {MODEL_NAME} ({MODEL_STAGE})")
+model_uri = f"models:/{MODEL_NAME}/{MODEL_STAGE}"
+model = mlflow.pyfunc.load_model(model_uri)
+print("✅ Model loaded successfully!")
+
+# -------- Load Scalers --------
+if not os.path.exists(FEATURE_SCALER_PATH):
+    raise FileNotFoundError(f"❌ Feature scaler not found at {FEATURE_SCALER_PATH}")
+if not os.path.exists(TARGET_SCALER_PATH):
+    raise FileNotFoundError(f"❌ Target scaler not found at {TARGET_SCALER_PATH}")
+
+feature_scaler = joblib.load(FEATURE_SCALER_PATH)
+target_scaler = joblib.load(TARGET_SCALER_PATH)
+print("✅ Feature & Target scalers loaded successfully!")
+
+# -------- Load Latest Data --------
+df = pd.read_parquet(DATA_PATH)
+print(f"📥 Loaded data from: {DATA_PATH}")
+print(f"Initial columns: {list(df.columns)}")
+
+# 🛠️ Fix: Rename 'time' → 'event_timestamp' if necessary
+if "event_timestamp" not in df.columns and "time" in df.columns:
+    df.rename(columns={"time": "event_timestamp"}, inplace=True)
+    print("🔁 Renamed column 'time' → 'event_timestamp'")
+
+# ✅ Validate timestamp column
+if "event_timestamp" not in df.columns:
+    raise KeyError("❌ Missing 'event_timestamp' column — please ensure feature_engineering.py saved it correctly.")
+
+# ✅ Convert timestamp to datetime and sort
+df["event_timestamp"] = pd.to_datetime(df["event_timestamp"], errors="coerce")
+df = df.dropna(subset=["event_timestamp"]).sort_values("event_timestamp").reset_index(drop=True)
+print(f"✅ Data ready. Rows: {len(df)} | Time range: {df['event_timestamp'].min()} → {df['event_timestamp'].max()}")
+
+# -------- Prepare Latest Input --------
+latest = df.iloc[-1:].copy()
+print(f"📅 Latest data timestamp: {latest['event_timestamp'].iloc[0]}")
+
+# -------- Detect PM-like Columns --------
+pm_candidates = [c for c in df.columns if "pm25" in c.lower() or "pm" in c.lower()]
+pm_candidates = [c for c in pm_candidates if c != TARGET_COL]
+print(f"ℹ️ PM-related columns to update: {pm_candidates}")
+
+# -------- Prepare Feature Columns --------
+feature_cols = [c for c in df.columns if c not in ["city", "event_timestamp", TARGET_COL]]
+current_input = latest[feature_cols + ["event_timestamp", TARGET_COL]].copy().reset_index(drop=True)
+
+# -------- Forecast Loop --------
+forecasts = []
+
+for step in range(1, FORECAST_HORIZON + 1):
+    # ✅ Scale input features before prediction
+    X = current_input[feature_cols]
+    X_scaled = feature_scaler.transform(X)
+
+    # ✅ FIX: Convert scaled NumPy array → DataFrame (adds column names)
+    X_scaled_df = pd.DataFrame(X_scaled, columns=feature_cols)
+
+    # 🧠 Model prediction on scaled input
+    scaled_pred = model.predict(X_scaled_df)[0]
+
+    # 🧩 Inverse transform (to get actual AQI)
+    pred_value = target_scaler.inverse_transform([[scaled_pred]])[0][0]
+
+    # Compute next timestamp
+    next_date = current_input["event_timestamp"].iloc[0] + timedelta(days=1)
+    forecasts.append({
+        "forecast_day": f"Day+{step}",
+        "predicted_date": next_date.date(),
+        "predicted_AQI": round(pred_value, 2)
+    })
+
+    # ⚙️ ---- Update Input for Next Iteration ----
+    current_input["event_timestamp"] = next_date
+
+    # Update PM columns with scaled prediction (for continuity)
+    for pm_col in pm_candidates:
+        if pm_col in current_input.columns:
+            current_input[pm_col] = scaled_pred
+
+    # Update target column
+    if TARGET_COL in current_input.columns:
+        current_input[TARGET_COL] = scaled_pred
+
+    # 🔁 Update lag features dynamically
+    lag_features = [c for c in current_input.columns if "lag" in c.lower()]
+    for lag_col in lag_features:
+        try:
+            lag_num = int(''.join(filter(str.isdigit, lag_col)))
+            if lag_num == 1:
+                current_input[lag_col] = scaled_pred
+            else:
+                prev_lag = f"pm25_lag{lag_num - 1}"
+                if prev_lag in current_input.columns:
+                    current_input[lag_col] = current_input[prev_lag]
+        except:
+            pass
+
+# -------- Save Forecast --------
+forecast_df = pd.DataFrame(forecasts)
+out_csv = os.path.join(PRED_PATH, "forecast_next_3_days.csv")
+forecast_df.to_csv(out_csv, index=False)
+
+print("\n📈 Forecast for next 3 days (Actual AQI Values):")
+print(forecast_df)
+print(f"\n💾 Saved to: {out_csv}")

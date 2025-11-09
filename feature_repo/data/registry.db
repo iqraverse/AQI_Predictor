@@ -1,0 +1,46 @@
+
+`
+@
+city"City name for air quality features"cityJfeature_repo
+ˆ¬¾ÈØı…«Ì«ÀÈ€©£Ë
+C
+#
+__dummy"
+__dummy_idJfeature_repo
+ˆ¬¾ÈØı…«Ì«ÀÈ€©£Ë1"$24885794-402a-4f2e-853e-471b57bb35a9*Ì«ÀÈàİËŞ2Ô
+³
+karachi_aqi_featuresfeature_repocity"
+pm25"
+co"
+no2"
+so2"
+o3"
+temperature"
+humidity"
+
+wind_speed"
+pressure_msl"
+hour"
+	dayofweek"	
+month"
+
+is_weekend"
+	pm25_lag1"
+	pm25_lag2"
+pm25_roll3h"
+pm25_roll6h"
+pm25_change_rate"
+humidity_lag12h"
+wind_speed_lag24h"
+target_pm25_next*!
+sourcefeature_engineered_data*
+cityKarachi:timeZXVc:\Users\iqram\DataScience\Project_AQI_Predicitor\data\final\karachi_aqi_final.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢Vc:\Users\iqram\DataScience\Project_AQI_Predicitor\data\final\karachi_aqi_final.parquet’êû¿ÈÈ°K"Ì«ÀÈˆÌİÆ@b
+city
+ˆ¬¾ÈÀÃªÌ«ÀÈˆÌİÆR«
+¨
+,feast.infra.online_stores.sqlite.SqliteTable"x
+SC:\Users\iqram\DataScience\Project_AQI_Predicitor\feature_repo\data\online_store.db!feature_repo_karachi_aqi_featuresb‰event_timestampZXVC:\Users\iqram\DataScience\Project_AQI_Predicitor\data\final\karachi_aqi_final.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢VC:\Users\iqram\DataScience\Project_AQI_Predicitor\data\final\karachi_aqi_final.parquetªfeature_repobœtimeZXVc:\Users\iqram\DataScience\Project_AQI_Predicitor\data\final\karachi_aqi_final.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢Vc:\Users\iqram\DataScience\Project_AQI_Predicitor\data\final\karachi_aqi_final.parquetªfeature_repo’êû¿ÈÈ°K"Ì«ÀÈˆÌİÆz4
+feature_repo$bcf2b85f-c5ff-4507-8d35-0e9f2bd5f205Š.
+
+feature_repo
+ˆ¬¾È˜±æ¨ˆ¬¾È˜±æ¨

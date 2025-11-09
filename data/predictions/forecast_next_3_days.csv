@@ -1,0 +1,4 @@
+forecast_day,predicted_date,predicted_AQI
+Day+1,2025-11-08,-1.01
+Day+2,2025-11-09,-1.07
+Day+3,2025-11-10,-1.07
