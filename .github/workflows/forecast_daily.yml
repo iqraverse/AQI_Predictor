@@ -34,14 +34,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # ✅ STEP 2: Download artifacts from that run
+      # ✅ STEP 2: Download MLflow registry artifact from last successful run
       - name: "📦 Download MLflow Registry Artifact"
         if: ${{ steps.find_run.outputs.run_id != '' }}
         uses: actions/download-artifact@v4
         with:
-          name: mlflow_artifacts
+          name: mlflow-registry       # 🔥 Must match retrain_model.yml
           path: .
-          repository: iqraverse/AQI_Predictor
           run-id: ${{ steps.find_run.outputs.run_id }}
 
       # ✅ STEP 3: Debug to verify artifact contents
